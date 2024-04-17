@@ -1,31 +1,42 @@
 -- ------------------------------------------------------------------------------
 --   DDL code by Eric Anacleto Ribeiro
---   Contains the Data Definition Language code for creating the database schema
---   2024-03-31; updated on 2024-04-15
+--   Contains the Data Definition Language code for creating the Company database schema
+--   2024-03-31; last update on 2024-04-15
 -- ------------------------------------------------------------------------------
 
 
--- Statements for debugging
-DROP TABLE Dependents CASCADE CONSTRAINTS;
-DROP TABLE EmployeeTranfers CASCADE CONSTRAINTS;
-DROP TABLE Departments CASCADE CONSTRAINTS;
-DROP TABLE Locations CASCADE CONSTRAINTS;
-DROP TABLE DepartmentManagers CASCADE CONSTRAINTS;
-DROP TABLE ProductTransfers CASCADE CONSTRAINTS;
-DROP TABLE Inventory CASCADE CONSTRAINTS;
-DROP TABLE Warehouses CASCADE CONSTRAINTS;
-DROP TABLE OrdersDetails CASCADE CONSTRAINTS;
-DROP TABLE SalesOrders CASCADE CONSTRAINTS;
-DROP TABLE Products CASCADE CONSTRAINTS;
-DROP TABLE Customers CASCADE CONSTRAINTS;
-DROP TABLE Assignments CASCADE CONSTRAINTS;
-DROP TABLE Projects CASCADE CONSTRAINTS;
-DROP TABLE Employees CASCADE CONSTRAINTS;
-DROP TRIGGER update_employee_department;
-DROP TRIGGER update_warehouse_inventory;
+-- ------------------------------------------------------------------------------
+-- Drop statements for debugging and development purposes
+-- ------------------------------------------------------------------------------
+BEGIN
+    EXECUTE IMMEDIATE 'DROP TABLE Dependents CASCADE CONSTRAINTS';
+    EXECUTE IMMEDIATE 'DROP TABLE EmployeeTranfers CASCADE CONSTRAINTS';
+    EXECUTE IMMEDIATE 'DROP TABLE Departments CASCADE CONSTRAINTS';
+    EXECUTE IMMEDIATE 'DROP TABLE Locations CASCADE CONSTRAINTS';
+    EXECUTE IMMEDIATE 'DROP TABLE DepartmentManagers CASCADE CONSTRAINTS';
+    EXECUTE IMMEDIATE 'DROP TABLE ProductTransfers CASCADE CONSTRAINTS';
+    EXECUTE IMMEDIATE 'DROP TABLE Inventory CASCADE CONSTRAINTS';
+    EXECUTE IMMEDIATE 'DROP TABLE Warehouses CASCADE CONSTRAINTS';
+    EXECUTE IMMEDIATE 'DROP TABLE OrdersDetails CASCADE CONSTRAINTS';
+    EXECUTE IMMEDIATE 'DROP TABLE SalesOrders CASCADE CONSTRAINTS';
+    EXECUTE IMMEDIATE 'DROP TABLE Products CASCADE CONSTRAINTS';
+    EXECUTE IMMEDIATE 'DROP TABLE Customers CASCADE CONSTRAINTS';
+    EXECUTE IMMEDIATE 'DROP TABLE Assignments CASCADE CONSTRAINTS';
+    EXECUTE IMMEDIATE 'DROP TABLE Projects CASCADE CONSTRAINTS';
+    EXECUTE IMMEDIATE 'DROP TABLE Employees CASCADE CONSTRAINTS';
+EXCEPTION
+    WHEN OTHERS THEN
+        IF SQLCODE != -4043 THEN
+            RAISE;
+        END IF;
+END;
+/
 
 
--- Generating the tables
+-- ------------------------------------------------------------------------------
+-- Tables to store information about the company and compose the database schema
+-- ------------------------------------------------------------------------------
+
 -- The Departments table stores information about the different departments in the organization.
 -- Managers will be dealt with in a separate table, as they can change over time and the period of management must be stored, as per instructions.
 CREATE TABLE Departments (
@@ -36,10 +47,11 @@ CREATE TABLE Departments (
 
 -- The Locations table stores information about the different locations where departments, warehouses and/or projects are located.
 -- As Departments can have multiple locations, the DepartmentNumber column is a foreign key. The same does not apply for Warehouses and Projects.
+-- DepartmentNumber can be NULL as this table also stores information about locations that are not directly related to a department.
 CREATE TABLE Locations (
     LocationCode NUMBER,
     DepartmentNumber NUMBER,
-    StreetAddress VARCHAR2(200) NOT NULL,
+    StreetAddress VARCHAR2(100) NOT NULL,
     City VARCHAR2(50) NOT NULL,
     ZipCode VARCHAR2(10) NOT NULL,
     PRIMARY KEY (LocationCode),
@@ -49,12 +61,13 @@ CREATE TABLE Locations (
 -- The Employees table stores information about the employees in the organization.
 -- The SupervisorID column is a foreign key that references the EmployeeID column in the same table. It can be NULL as not all employees have a supervisor (e.g. C-Level).
 -- The address is stored in a single column within the table, as the Locations table refers only to entities that belong to the company.
+-- Even though a DEFAULT value is set for some columns, the NOT NULL constraint prevents future insertion manipulations without a value. This also applies to all other tables.
 CREATE TABLE Employees (
     EmployeeID NUMBER,
     SupervisorID NUMBER,
     DepartmentNumber NUMBER NOT NULL,
-    IsManager CHAR(1) DEFAULT 0 NOT NULL,
-    JobTile VARCHAR2(30) NOT NULL,
+    IsManager NUMBER DEFAULT 0 NOT NULL,
+    JobTitle VARCHAR2(30) NOT NULL,
     FirstName VARCHAR2(15) NOT NULL,
     LastName VARCHAR2(30) NOT NULL,
     NationalInsuranceNumber VARCHAR2(20) NOT NULL,
@@ -83,17 +96,6 @@ CREATE TABLE DepartmentManagers (
     FOREIGN KEY (DepartmentNumber) REFERENCES Department(DepartmentNumber)
 );
 
--- Trigger to update the IsManager column in the Employees table when a new manager is assigned to a department
-CREATE OR REPLACE TRIGGER set_is_manager
-AFTER INSERT OR UPDATE ON DepartmentManagers
-FOR EACH ROW
-BEGIN
-   UPDATE Employees
-   SET IsManager = 1
-   WHERE EmployeeID = :new.EmployeeID;
-END;
-/
-
 -- The Dependents table stores information about the dependents of employees.
 CREATE TABLE Dependents (
     DependentID NUMBER,
@@ -119,36 +121,31 @@ CREATE TABLE EmployeeTransfers (
     CHECK (FromDepartmentNumber <> ToDepartmentNumber)
 );
 
--- Trigger to update the department of an employee when a transfer is recorded
-CREATE OR REPLACE TRIGGER update_employee_department
-AFTER INSERT ON EmployeeTransfers
-FOR EACH ROW
-BEGIN
-   UPDATE Employee
-   SET DepartmentNumber = :new.ToDepartmentNumber
-   WHERE EmployeeID = :new.EmployeeID;
-END;
-/
-
 -- The Projects table stores information about the projects in the organization.
+-- The use of DEFAULT SYSDATE vs only NOT NULL to ensure completion varies according to the organization's needs. Most likely, the organization will have a specific date for the start of a project, thus the choice to not use DEFAULT for this table.
 CREATE TABLE Projects (
     ProjectNumber NUMBER,
     DepartmentNumber NUMBER NOT NULL,
     LocationCode NUMBER NOT NULL,
     ProjectName VARCHAR2(50) NOT NULL,
-    StartDate DEFAULT TRUNC(SYSDATE) NOT NULL,
+    StartDate DATE NOT NULL,
+    EndDate DATE,
     PRIMARY KEY (ProjectNumber),
     FOREIGN KEY (DepartmentNumber) REFERENCES Department(DepartmentNumber),
     FOREIGN KEY (LocationCode) REFERENCES Location(LocationCode)
 );
 
 -- The Assignments table stores information about the assignments of employees to projects.
--- AssignmentID as a PK accomodates the edge case in which an employee is assigned to the same project multiple times.
+-- This table resolves the many-to-many relationship between Employees and Projects.
+-- AssignmentID as a PK accomodates the edge case in which an employee is assigned to the same project multiple times (which invalidades a composite key of EmployeeID and ProjectNumber).
+-- AssignmentStart and AssignmentEnd refers to the period in which the employee is assigned to the project, not necessarily the project's start and end dates, which is handled by the Projects table. To ensure that the assignment dates fall within the project dates, a stored procedure is used (dml.sql file).
 CREATE TABLE Assignments (
     AssignmentID NUMBER,
-    EmployeeID NUMBER,
-    ProjectNumber NUMBER,
+    EmployeeID NUMBER NOT NULL,
+    ProjectNumber NUMBER NOT NULL,
     HoursPerWeek NUMBER NOT NULL,
+    AssignmentStart DATE NOT NULL,
+    AssignmentEnd DATE,
     PRIMARY KEY (AssignmentID),
     FOREIGN KEY (EmployeeID) REFERENCES Employee(EmployeeID),
     FOREIGN KEY (ProjectNumber) REFERENCES Project(ProjectNumber)
@@ -157,6 +154,7 @@ CREATE TABLE Assignments (
 -- The Customers table stores information about the customers of the organization.
 -- The SalesRepresentative column is a foreign key that references the EmployeeID column in the Employees table responsible for the contact.
 -- The SalesRepresentative can be an attribute since each customer always contacts one and the same salesperson.
+-- The CHECK constraint ensures that at least one contact method is provided.
 CREATE TABLE Customers (
     CustomerID NUMBER,
     CustomerName VARCHAR2(50) NOT NULL,
@@ -165,32 +163,37 @@ CREATE TABLE Customers (
     SalesRepresentative NUMBER NOT NULL,
     PRIMARY KEY (CustomerID),
     FOREIGN KEY (SalesRepresentative) REFERENCES Employee(EmployeeID)
+    CHECK (CustomerEmail IS NOT NULL OR CustomerPhone IS NOT NULL)
 );
 
 -- The Products table stores information about the products sold by the organization.
 CREATE TABLE Products (
     ProductID NUMBER,
     ProductName VARCHAR2(20) NOT NULL,
-    ProductCategory VARCHAR2(20) NOT NULL,
-    ProducutDescription VARCHAR2(200),
+    ProductWeight NUMBER NOT NULL,
+    ProductPrice NUMBER(3, 2) NOT NULL,
     PRIMARY KEY (ProductID)
 );
 
 -- The SalesOrdes table stores information about the sales orders placed by customers.
 -- Since an order can have more than one product, this table simply links an order to a customer (adhering to the 1NF).
+-- Total price is allowed to be NULL as it can be calculated automatically from the OrdersDetails table once it is completed.
 CREATE TABLE SalesOrders (
     OrderNumber NUMBER,
     CustomerID NUMBER NOT NULL,
+    TotalPrice NUMBER(12, 2),
     PRIMARY KEY (OrderNumber),
     FOREIGN KEY (CustomerID) REFERENCES Customer(CustomerID)
 );
 
 -- The OrdersDetails table stores information about the products ordered in each sales order.
+-- The OrdersDetails table is necessary as SalesOrders and Products have a many-to-many relationship.
 -- Each combination of OrderNumber and ProductID is unique, as a product can only appear once in the same order.
 CREATE TABLE OrdersDetails (
     OrderNumber NUMBER,
     ProductID NUMBER, 
     Quantity NUMBER NOT NULL,
+    SubTotal NUMBER(12, 2) NOT NULL,
     PRIMARY KEY (OrderNumber, ProductID),
     FOREIGN KEY (ProductID) REFERENCES Product(ProductID),
     FOREIGN KEY (OrderNumber) REFERENCES SalesOrder(OrderNumber)
@@ -205,6 +208,7 @@ CREATE TABLE Warehouses (
 );
 
 -- Tracks inventory levels for products in each warehouse.
+-- This table is necessary as products and warehouses have a many-to-many relationship.
 CREATE TABLE Inventory (
     InventoryID NUMBER,
     ProductID NUMBER NOT NULL,
@@ -216,33 +220,17 @@ CREATE TABLE Inventory (
 );
 
 -- The ProductTransfers table stores information about product transfers between warehouses to ensure correct inventory.
+-- Data type for TransferDate is of TIMESTAMP to accomodate details that might be useful for future consultations.
 CREATE TABLE ProductTransfers (
     TransferID NUMBER,
     ProductID NUMBER NOT NULL,
     FromWarehouseID NUMBER NOT NULL,
     ToWarehouseID NUMBER NOT NULL,
     Quantity NUMBER NOT NULL,
-    TransferDate DATE NOT NULL,
+    TransferDate TIMESTAMP DEFAULT SYSTIMESTAMP NOT NULL,
     PRIMARY KEY (TransferID),
     FOREIGN KEY (ProductID) REFERENCES Product(ProductID),
     FOREIGN KEY (FromWarehouseID) REFERENCES Warehouse(WarehouseID),
     FOREIGN KEY (ToWarehouseID) REFERENCES Warehouse(WarehouseID),
     CHECK (FromWarehouseID <> ToWarehouseID)
 );
-
--- Trigger to update the inventory of a warehouse when a product transfer is recorded
-CREATE OR REPLACE TRIGGER update_warehouse_inventory
-AFTER INSERT ON ProductTransfers
-FOR EACH ROW
-BEGIN
-   -- Decrease the quantity of the product in the FromWarehouse
-   UPDATE Inventory
-   SET Quantity = Quantity - :new.Quantity
-   WHERE WarehouseID = :new.FromWarehouseID AND ProductID = :new.ProductID;
-
-   -- Increase the quantity of the product in the ToWarehouse
-   UPDATE Inventory
-   SET Quantity = Quantity + :new.Quantity
-   WHERE WarehouseID = :new.ToWarehouseID AND ProductID = :new.ProductID;
-END;
-/
