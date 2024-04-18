@@ -1,36 +1,29 @@
 -- ------------------------------------------------------------------------------
 --   DDL code by Eric Anacleto Ribeiro
 --   Contains the Data Definition Language code for creating the Company database schema
---   2024-03-31; last update on 2024-04-15
+--   2024-03-31; last update on 2024-04-18
 -- ------------------------------------------------------------------------------
 
 
 -- ------------------------------------------------------------------------------
 -- Drop statements for debugging and development purposes
 -- ------------------------------------------------------------------------------
-BEGIN
-    EXECUTE IMMEDIATE 'DROP TABLE Dependents CASCADE CONSTRAINTS';
-    EXECUTE IMMEDIATE 'DROP TABLE EmployeeTranfers CASCADE CONSTRAINTS';
-    EXECUTE IMMEDIATE 'DROP TABLE Departments CASCADE CONSTRAINTS';
-    EXECUTE IMMEDIATE 'DROP TABLE Locations CASCADE CONSTRAINTS';
-    EXECUTE IMMEDIATE 'DROP TABLE DepartmentManagers CASCADE CONSTRAINTS';
-    EXECUTE IMMEDIATE 'DROP TABLE ProductTransfers CASCADE CONSTRAINTS';
-    EXECUTE IMMEDIATE 'DROP TABLE Inventory CASCADE CONSTRAINTS';
-    EXECUTE IMMEDIATE 'DROP TABLE Warehouses CASCADE CONSTRAINTS';
-    EXECUTE IMMEDIATE 'DROP TABLE OrdersDetails CASCADE CONSTRAINTS';
-    EXECUTE IMMEDIATE 'DROP TABLE SalesOrders CASCADE CONSTRAINTS';
-    EXECUTE IMMEDIATE 'DROP TABLE Products CASCADE CONSTRAINTS';
-    EXECUTE IMMEDIATE 'DROP TABLE Customers CASCADE CONSTRAINTS';
-    EXECUTE IMMEDIATE 'DROP TABLE Assignments CASCADE CONSTRAINTS';
-    EXECUTE IMMEDIATE 'DROP TABLE Projects CASCADE CONSTRAINTS';
-    EXECUTE IMMEDIATE 'DROP TABLE Employees CASCADE CONSTRAINTS';
-EXCEPTION
-    WHEN OTHERS THEN
-        IF SQLCODE != -4043 THEN
-            RAISE;
-        END IF;
-END;
-/
+
+DROP TABLE Dependents CASCADE CONSTRAINTS;
+DROP TABLE EmployeeTransfers CASCADE CONSTRAINTS;
+DROP TABLE Departments CASCADE CONSTRAINTS;
+DROP TABLE Locations CASCADE CONSTRAINTS;
+DROP TABLE DepartmentManagers CASCADE CONSTRAINTS;
+DROP TABLE ProductTransfers CASCADE CONSTRAINTS;
+DROP TABLE Inventory CASCADE CONSTRAINTS;
+DROP TABLE Warehouses CASCADE CONSTRAINTS;
+DROP TABLE OrdersDetails CASCADE CONSTRAINTS;
+DROP TABLE SalesOrders CASCADE CONSTRAINTS;
+DROP TABLE Products CASCADE CONSTRAINTS;
+DROP TABLE Customers CASCADE CONSTRAINTS;
+DROP TABLE Assignments CASCADE CONSTRAINTS;
+DROP TABLE Projects CASCADE CONSTRAINTS;
+DROP TABLE Employees CASCADE CONSTRAINTS;
 
 
 -- ------------------------------------------------------------------------------
@@ -70,7 +63,7 @@ CREATE TABLE Employees (
     JobTitle VARCHAR2(30) NOT NULL,
     FirstName VARCHAR2(15) NOT NULL,
     LastName VARCHAR2(30) NOT NULL,
-    NationalInsuranceNumber VARCHAR2(20) NOT NULL,
+    NationalInsuranceNumber VARCHAR2(20) NOT NULL UNIQUE,
     StreetAddress VARCHAR2(100) NOT NULL,
     Salary NUMBER NOT NULL,
     DateOfBirth DATE NOT NULL,
@@ -92,7 +85,7 @@ CREATE TABLE DepartmentManagers (
     StartDate DATE DEFAULT TRUNC(SYSDATE) NOT NULL,
     EndDate DATE,
     PRIMARY KEY (ManagerID),
-    FOREIGN KEY (EmployeeID) REFERENCES Employee(EmployeeID)
+    FOREIGN KEY (EmployeeID) REFERENCES Employee(EmployeeID),
     FOREIGN KEY (DepartmentNumber) REFERENCES Department(DepartmentNumber)
 );
 
@@ -116,8 +109,8 @@ CREATE TABLE EmployeeTransfers (
     TransferDate DATE DEFAULT TRUNC(SYSDATE) NOT NULL,
     PRIMARY KEY (TransferID),
     FOREIGN KEY (EmployeeID) REFERENCES Employee(EmployeeID),
-    FOREIGN KEY (FromDepartmentNumber) REFERENCES Department(DepartmentNumber)
-    FOREIGN KEY (ToDepartmentNumber) REFERENCES Department(DepartmentNumber)
+    FOREIGN KEY (FromDepartmentNumber) REFERENCES Department(DepartmentNumber),
+    FOREIGN KEY (ToDepartmentNumber) REFERENCES Department(DepartmentNumber),
     CHECK (FromDepartmentNumber <> ToDepartmentNumber)
 );
 
@@ -157,12 +150,12 @@ CREATE TABLE Assignments (
 -- The CHECK constraint ensures that at least one contact method is provided.
 CREATE TABLE Customers (
     CustomerID NUMBER,
+    SalesRepresentative NUMBER NOT NULL,
     CustomerName VARCHAR2(50) NOT NULL,
     CustomerEmail VARCHAR2(50),
     CustomerPhone VARCHAR2(20),
-    SalesRepresentative NUMBER NOT NULL,
     PRIMARY KEY (CustomerID),
-    FOREIGN KEY (SalesRepresentative) REFERENCES Employee(EmployeeID)
+    FOREIGN KEY (SalesRepresentative) REFERENCES Employee(EmployeeID),
     CHECK (CustomerEmail IS NOT NULL OR CustomerPhone IS NOT NULL)
 );
 
@@ -181,6 +174,7 @@ CREATE TABLE Products (
 CREATE TABLE SalesOrders (
     OrderNumber NUMBER,
     CustomerID NUMBER NOT NULL,
+    OrderDate DATE DEFAULT TRUNC(SYSDATE) NOT NULL,
     TotalPrice NUMBER(12, 2) DEFAULT 0 NOT NULL,
     PRIMARY KEY (OrderNumber),
     FOREIGN KEY (CustomerID) REFERENCES Customer(CustomerID)
