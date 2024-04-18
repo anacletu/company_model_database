@@ -8,31 +8,23 @@
 -- ------------------------------------------------------------------------------
 -- Drop statements for debugging and development purposes
 -- ------------------------------------------------------------------------------
-BEGIN
-    EXECUTE IMMEDIATE 'DROP SEQUENCE assignment_seq';
-    EXECUTE IMMEDIATE 'DROP SEQUENCE order_number_seq';
+DROP SEQUENCE assignment_seq;
+DROP SEQUENCE order_number_seq;
 
-    EXECUTE IMMEDIATE 'DROP TRIGGER check_stock';
-    EXECUTE IMMEDIATE 'DROP TRIGGER update_inventory_on_order_update';
-    EXECUTE IMMEDIATE 'DROP TRIGGER set_is_manager';
-    EXECUTE IMMEDIATE 'DROP TRIGGER end_of_managing_period';
-    EXECUTE IMMEDIATE 'DROP TRIGGER update_employee_department';
-    EXECUTE IMMEDIATE 'DROP TRIGGER handle_employee_deletion';
-    EXECUTE IMMEDIATE 'DROP TRIGGER handle_employee_leaving';
-    EXECUTE IMMEDIATE 'DROP TRIGGER handle_product_deletion';
-    EXECUTE IMMEDIATE 'DROP TRIGGER check_inventory';
-    EXECUTE IMMEDIATE 'DROP TRIGGER update_warehouse_inventory';
-    EXECUTE IMMEDIATE 'DROP TRIGGER check_assignment_dates';
-    EXECUTE IMMEDIATE 'DROP TRIGGER check_sales_rep';
-    EXECUTE IMMEDIATE 'DROP TRIGGER calculate_subtotal';
-    EXECUTE IMMEDIATE 'DROP TRIGGER calculate_total_price';
-EXCEPTION
-    WHEN OTHERS THEN
-        IF SQLCODE != -4043 THEN
-            RAISE;
-        END IF;
-END;
-/
+DROP TRIGGER check_stock;
+DROP TRIGGER update_inventory_on_order_update;
+DROP TRIGGER set_is_manager;
+DROP TRIGGER end_of_managing_period;
+DROP TRIGGER update_employee_department;
+DROP TRIGGER handle_employee_deletion;
+DROP TRIGGER handle_employee_leaving;
+DROP TRIGGER handle_product_deletion;
+DROP TRIGGER check_inventory;
+DROP TRIGGER update_warehouse_inventory;
+DROP TRIGGER check_assignment_dates;
+DROP TRIGGER check_sales_rep;
+DROP TRIGGER calculate_subtotal;
+DROP TRIGGER calculate_total_price;
 
 
 -- ------------------------------------------------------------------------------
