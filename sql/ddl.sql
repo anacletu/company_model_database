@@ -177,11 +177,11 @@ CREATE TABLE Products (
 
 -- The SalesOrdes table stores information about the sales orders placed by customers.
 -- Since an order can have more than one product, this table simply links an order to a customer (adhering to the 1NF).
--- Total price is allowed to be NULL as it can be calculated automatically from the OrdersDetails table once it is completed.
+-- Total price is set to 0 as it will be calculated automatically (trigger) from the OrdersDetails table once it is filled. Another option would be to insert the total price and compare it with the sum of the subtotals, raising an error if they do not match.
 CREATE TABLE SalesOrders (
     OrderNumber NUMBER,
     CustomerID NUMBER NOT NULL,
-    TotalPrice NUMBER(12, 2),
+    TotalPrice NUMBER(12, 2) DEFAULT 0 NOT NULL,
     PRIMARY KEY (OrderNumber),
     FOREIGN KEY (CustomerID) REFERENCES Customer(CustomerID)
 );
