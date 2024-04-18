@@ -48,7 +48,7 @@ CREATE TABLE Locations (
     City VARCHAR2(50) NOT NULL,
     ZipCode VARCHAR2(10) NOT NULL,
     PRIMARY KEY (LocationCode),
-    FOREIGN KEY (DepartmentNumber) REFERENCES Department(DepartmentNumber)
+    FOREIGN KEY (DepartmentNumber) REFERENCES Departments(DepartmentNumber)
 );
 
 -- The Employees table stores information about the employees in the organization.
@@ -72,8 +72,8 @@ CREATE TABLE Employees (
     StartDate DATE DEFAULT TRUNC(SYSDATE) NOT NULL,
     LeavingDate DATE,
     PRIMARY KEY (EmployeeID),
-    FOREIGN KEY (DepartmentNumber) REFERENCES Department(DepartmentNumber),
-    FOREIGN KEY (SupervisorID) REFERENCES Employee(EmployeeID)
+    FOREIGN KEY (DepartmentNumber) REFERENCES Departments(DepartmentNumber),
+    FOREIGN KEY (SupervisorID) REFERENCES Employees(EmployeeID)
 );
 
 -- The DepartmentManagers table stores information about the managers of departments.
@@ -85,8 +85,8 @@ CREATE TABLE DepartmentManagers (
     StartDate DATE DEFAULT TRUNC(SYSDATE) NOT NULL,
     EndDate DATE,
     PRIMARY KEY (ManagerID),
-    FOREIGN KEY (EmployeeID) REFERENCES Employee(EmployeeID),
-    FOREIGN KEY (DepartmentNumber) REFERENCES Department(DepartmentNumber)
+    FOREIGN KEY (EmployeeID) REFERENCES Employees(EmployeeID),
+    FOREIGN KEY (DepartmentNumber) REFERENCES Departments(DepartmentNumber)
 );
 
 -- The Dependents table stores information about the dependents of employees.
@@ -97,7 +97,7 @@ CREATE TABLE Dependents (
     BirthDate DATE NOT NULL,
     Relationship VARCHAR2(50) NOT NULL,
     PRIMARY KEY (DependentID),
-    FOREIGN KEY (EmployeeID) REFERENCES Employee(EmployeeID)
+    FOREIGN KEY (EmployeeID) REFERENCES Employees(EmployeeID)
 );
 
 -- The EmployeeTransfers table stores information about the department transfers of employees.
@@ -108,9 +108,9 @@ CREATE TABLE EmployeeTransfers (
     ToDepartmentNumber NUMBER NOT NULL,
     TransferDate DATE DEFAULT TRUNC(SYSDATE) NOT NULL,
     PRIMARY KEY (TransferID),
-    FOREIGN KEY (EmployeeID) REFERENCES Employee(EmployeeID),
-    FOREIGN KEY (FromDepartmentNumber) REFERENCES Department(DepartmentNumber),
-    FOREIGN KEY (ToDepartmentNumber) REFERENCES Department(DepartmentNumber),
+    FOREIGN KEY (EmployeeID) REFERENCES Employees(EmployeeID),
+    FOREIGN KEY (FromDepartmentNumber) REFERENCES Departments(DepartmentNumber),
+    FOREIGN KEY (ToDepartmentNumber) REFERENCES Departments(DepartmentNumber),
     CHECK (FromDepartmentNumber <> ToDepartmentNumber)
 );
 
@@ -124,8 +124,8 @@ CREATE TABLE Projects (
     StartDate DATE NOT NULL,
     EndDate DATE,
     PRIMARY KEY (ProjectNumber),
-    FOREIGN KEY (DepartmentNumber) REFERENCES Department(DepartmentNumber),
-    FOREIGN KEY (LocationCode) REFERENCES Location(LocationCode)
+    FOREIGN KEY (DepartmentNumber) REFERENCES Departments(DepartmentNumber),
+    FOREIGN KEY (LocationCode) REFERENCES Locations(LocationCode)
 );
 
 -- The Assignments table stores information about the assignments of employees to projects.
@@ -140,8 +140,8 @@ CREATE TABLE Assignments (
     AssignmentStart DATE NOT NULL,
     AssignmentEnd DATE,
     PRIMARY KEY (AssignmentID),
-    FOREIGN KEY (EmployeeID) REFERENCES Employee(EmployeeID),
-    FOREIGN KEY (ProjectNumber) REFERENCES Project(ProjectNumber)
+    FOREIGN KEY (EmployeeID) REFERENCES Employees(EmployeeID),
+    FOREIGN KEY (ProjectNumber) REFERENCES Projects(ProjectNumber)
 );
 
 -- The Customers table stores information about the customers of the organization.
@@ -155,7 +155,7 @@ CREATE TABLE Customers (
     CustomerEmail VARCHAR2(50),
     CustomerPhone VARCHAR2(20),
     PRIMARY KEY (CustomerID),
-    FOREIGN KEY (SalesRepresentative) REFERENCES Employee(EmployeeID),
+    FOREIGN KEY (SalesRepresentative) REFERENCES Employees(EmployeeID),
     CHECK (CustomerEmail IS NOT NULL OR CustomerPhone IS NOT NULL)
 );
 
@@ -177,7 +177,7 @@ CREATE TABLE SalesOrders (
     OrderDate DATE DEFAULT TRUNC(SYSDATE) NOT NULL,
     TotalPrice NUMBER(12, 2) DEFAULT 0 NOT NULL,
     PRIMARY KEY (OrderNumber),
-    FOREIGN KEY (CustomerID) REFERENCES Customer(CustomerID)
+    FOREIGN KEY (CustomerID) REFERENCES Customers(CustomerID)
 );
 
 -- The OrdersDetails table stores information about the products ordered in each sales order.
@@ -189,8 +189,8 @@ CREATE TABLE OrdersDetails (
     Quantity NUMBER NOT NULL,
     SubTotal NUMBER(12, 2) NOT NULL,
     PRIMARY KEY (OrderNumber, ProductID),
-    FOREIGN KEY (ProductID) REFERENCES Product(ProductID),
-    FOREIGN KEY (OrderNumber) REFERENCES SalesOrder(OrderNumber)
+    FOREIGN KEY (ProductID) REFERENCES Products(ProductID),
+    FOREIGN KEY (OrderNumber) REFERENCES SalesOrders(OrderNumber)
 );
 
 -- The Warehouses table stores information about the different warehouses where products are stored.
@@ -198,7 +198,7 @@ CREATE TABLE Warehouses (
     WarehouseID NUMBER,
     LocationCode NUMBER NOT NULL,
     PRIMARY KEY (WarehouseID),
-    FOREIGN KEY (LocationCode) REFERENCES Location(LocationCode)
+    FOREIGN KEY (LocationCode) REFERENCES Locations(LocationCode)
 );
 
 -- Tracks inventory levels for products in each warehouse.
@@ -209,8 +209,8 @@ CREATE TABLE Inventory (
     WarehouseID NUMBER NOT NULL,
     Quantity NUMBER NOT NULL,
     PRIMARY KEY (InventoryID),
-    FOREIGN KEY (ProductID) REFERENCES Product(ProductID),
-    FOREIGN KEY (WarehouseID) REFERENCES Warehouse(WarehouseID)
+    FOREIGN KEY (ProductID) REFERENCES Products(ProductID),
+    FOREIGN KEY (WarehouseID) REFERENCES Warehouses(WarehouseID)
 );
 
 -- The ProductTransfers table stores information about product transfers between warehouses to ensure correct inventory.
@@ -223,8 +223,8 @@ CREATE TABLE ProductTransfers (
     Quantity NUMBER NOT NULL,
     TransferDate TIMESTAMP DEFAULT SYSTIMESTAMP NOT NULL,
     PRIMARY KEY (TransferID),
-    FOREIGN KEY (ProductID) REFERENCES Product(ProductID),
-    FOREIGN KEY (FromWarehouseID) REFERENCES Warehouse(WarehouseID),
-    FOREIGN KEY (ToWarehouseID) REFERENCES Warehouse(WarehouseID),
+    FOREIGN KEY (ProductID) REFERENCES Products(ProductID),
+    FOREIGN KEY (FromWarehouseID) REFERENCES Warehouses(WarehouseID),
+    FOREIGN KEY (ToWarehouseID) REFERENCES Warehouses(WarehouseID),
     CHECK (FromWarehouseID <> ToWarehouseID)
 );
