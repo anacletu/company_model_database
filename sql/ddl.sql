@@ -73,6 +73,8 @@ CREATE TABLE Employees (
     PRIMARY KEY (EmployeeID),
     FOREIGN KEY (DepartmentNumber) REFERENCES Departments(DepartmentNumber),
     FOREIGN KEY (SupervisorID) REFERENCES Employees(EmployeeID)
+    CHECK (IsManager IN (0, 1))
+    CHECK (LeavingDate IS NULL OR LeavingDate > StartDate)
 );
 
 -- The DepartmentManagers table stores information about the managers of departments.
@@ -86,6 +88,7 @@ CREATE TABLE DepartmentManagers (
     PRIMARY KEY (ManagerID),
     FOREIGN KEY (EmployeeID) REFERENCES Employees(EmployeeID),
     FOREIGN KEY (DepartmentNumber) REFERENCES Departments(DepartmentNumber)
+    CHECK (EndDate IS NULL OR EndDate > StartDate)
 );
 
 -- The Dependents table stores information about the dependents of employees.
@@ -125,6 +128,7 @@ CREATE TABLE Projects (
     PRIMARY KEY (ProjectNumber),
     FOREIGN KEY (DepartmentNumber) REFERENCES Departments(DepartmentNumber),
     FOREIGN KEY (LocationCode) REFERENCES Locations(LocationCode)
+    CHECK (EndDate IS NULL OR EndDate > StartDate)
 );
 
 -- The Assignments table stores information about the assignments of employees to projects.
@@ -141,6 +145,7 @@ CREATE TABLE Assignments (
     PRIMARY KEY (AssignmentID),
     FOREIGN KEY (EmployeeID) REFERENCES Employees(EmployeeID),
     FOREIGN KEY (ProjectNumber) REFERENCES Projects(ProjectNumber)
+    CHECK (AssignmentEnd IS NULL OR AssignmentEnd > AssignmentStart)
 );
 
 -- The Customers table stores information about the customers of the organization.
