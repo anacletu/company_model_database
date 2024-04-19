@@ -1,13 +1,9 @@
 -- ------------------------------------------------------------------------------
 --    Triggers code by Eric Anacleto Ribeiro
 --    Contains triggers for the Company database
---    2024-04-15; last update on 2024-04-18
+--    2024-04-15; last update on 2024-04-19
 -- ------------------------------------------------------------------------------
 
-
--- ------------------------------------------------------------------------------
--- Triggers and stored procedures to maintain data integrity and consistency
--- ------------------------------------------------------------------------------
 
 -- Trigger to check if there is enough stock for a product before placing an order.
 CREATE OR REPLACE TRIGGER check_stock
@@ -64,7 +60,7 @@ CREATE OR REPLACE TRIGGER update_employee_department
 AFTER INSERT ON EmployeeTransfers
 FOR EACH ROW
 BEGIN
-    UPDATE Employee
+    UPDATE Employees
     SET DepartmentNumber = :new.ToDepartmentNumber
     WHERE EmployeeID = :new.EmployeeID;
 END;
@@ -186,21 +182,6 @@ BEGIN
 END;
 /
 
--- Trigger to calculate the subtotal of an order detail based on the unit price and quantity of the product.
-CREATE OR REPLACE TRIGGER calculate_subtotal
-BEFORE INSERT OR UPDATE ON OrdersDetails
-FOR EACH ROW
-DECLARE
-   unit_price Product.ProductPrice%TYPE;
-BEGIN
-   SELECT ProductPrice INTO unit_price
-   FROM Product
-   WHERE ProductID = :NEW.ProductID;
-
-   :NEW.SubTotal := unit_price * :NEW.Quantity;
-END;
-/
-
 -- Trigger to calculate the total price of an order based on the sum of the subtotals of the order details.
 CREATE OR REPLACE TRIGGER calculate_total_price
 AFTER INSERT OR UPDATE ON OrdersDetails
@@ -215,5 +196,19 @@ BEGIN
    UPDATE SalesOrders
    SET TotalPrice = total_price
    WHERE OrderNumber = :NEW.OrderNumber;
+END;
+/
+
+-- Procedure to update the total price of a sales order when an order detail is filled.
+-- I created a procedure instead of a trigger to prevent the mutation of the table error.
+CREATE OR REPLACE PROCEDURE update_sales_orders AS 
+BEGIN
+    UPDATE SalesOrders
+    SET TotalPrice = (
+        SELECT SUM(SubTotal)
+        FROM OrdersDetails
+        WHERE OrderNumber = SalesOrders.OrderNumber
+    );
+    COMMIT;
 END;
 /
