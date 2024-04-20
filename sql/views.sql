@@ -5,12 +5,11 @@
 -- ------------------------------------------------------------------------------
 
 -- Create a view that shows the details of each employee
--- As each department spreads across multiple locations, the view will show diplicates of the same employee
 CREATE OR REPLACE VIEW EmployeeDetails_view AS
-SELECT E.EmployeeID, E.FirstName, E.LastName, E.JobTitle, E.Email, D.DepartmentName, L.City
+SELECT E.EmployeeID, E.FirstName, E.LastName, E.JobTitle, E.Email, D.DepartmentName, M.FirstName AS ManagerFirstName, M.LastName AS ManagerLastName
 FROM Employees E
 JOIN Departments D ON E.DepartmentNumber = D.DepartmentNumber
-JOIN Locations L ON D.DepartmentNumber = L.DepartmentNumber;
+LEFT JOIN DepartmentManagers DM ON D.DepartmentNumber = DM.DepartmentNumber;
 
 -- Create a view that shows the details of each project
 CREATE OR REPLACE VIEW ProjectAssignments_view AS
