@@ -72,8 +72,8 @@ CREATE TABLE Employees (
     LeavingDate DATE,
     PRIMARY KEY (EmployeeID),
     FOREIGN KEY (DepartmentNumber) REFERENCES Departments(DepartmentNumber),
-    FOREIGN KEY (SupervisorID) REFERENCES Employees(EmployeeID)
-    CHECK (IsManager IN (0, 1))
+    FOREIGN KEY (SupervisorID) REFERENCES Employees(EmployeeID),
+    CHECK (IsManager IN (0, 1)),
     CHECK (LeavingDate IS NULL OR LeavingDate > StartDate)
 );
 
@@ -144,7 +144,7 @@ CREATE TABLE Assignments (
     AssignmentEnd DATE,
     PRIMARY KEY (AssignmentID),
     FOREIGN KEY (EmployeeID) REFERENCES Employees(EmployeeID),
-    FOREIGN KEY (ProjectNumber) REFERENCES Projects(ProjectNumber)
+    FOREIGN KEY (ProjectNumber) REFERENCES Projects(ProjectNumber),
     CHECK (AssignmentEnd IS NULL OR AssignmentEnd > AssignmentStart)
 );
 
