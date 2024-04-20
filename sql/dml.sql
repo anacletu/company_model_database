@@ -6,6 +6,25 @@
 
 
 -- ------------------------------------------------------------------------------
+-- Delete statements to clear the tables before inserting data
+-- ------------------------------------------------------------------------------
+DELETE FROM ProductTransfers;
+DELETE FROM OrdersDetails;
+DELETE FROM SalesOrders;
+DELETE FROM Customers;
+DELETE FROM Inventory;
+DELETE FROM Products;
+DELETE FROM Warehouses;
+DELETE FROM Assignments;
+DELETE FROM Projects;
+DELETE FROM Dependents;
+DELETE FROM DepartmentManagers;
+DELETE FROM Employees;
+DELETE FROM Locations;
+DELETE FROM Departments;
+
+
+-- ------------------------------------------------------------------------------
 -- Code for inserting data into the Company Database tables
 -- ------------------------------------------------------------------------------
 INSERT INTO Departments (DepartmentName)
@@ -16,7 +35,7 @@ CONNECT BY LEVEL <= 5;
 -- Using CASE statement to simulate the possibility of an employee leaving the company
 INSERT INTO Employees (DepartmentNumber, JobTitle, FirstName, LastName, NationalInsuranceNumber, StreetAddress, Salary, DateOfBirth, Email, PhoneNumber, StartDate, LeavingDate)
 SELECT
-    CEIL(DBMS_RANDOM.VALUE(1, 5)),
+    CEIL(DBMS_RANDOM.VALUE(0, 5)),
     p.job_title, 
     p.first_name, 
     p.last_name, 
@@ -26,14 +45,13 @@ SELECT
     random_birth_date(), 
     p.email, 
     random_phone_number(), 
-    start_date := random_date(),
+    random_date() AS StartDate,
     CASE 
-        WHEN DBMS_RANDOM.VALUE < 0.2 THEN start_date + FLOOR(DBMS_RANDOM.VALUE(1,365)
+        WHEN DBMS_RANDOM.VALUE < 0.2 THEN random_date() + FLOOR(DBMS_RANDOM.VALUE(1,365))
         ELSE NULL
-    END
+    END AS LeavingDate
 FROM People p
 WHERE rownum <= 1000;
-
 
 -- Using CASE statement to insert NULL values in the DepartmentNumber column, as not everylocation is necessarily associated with a department
 INSERT INTO Locations (DepartmentNumber, StreetAddress, City, ZipCode)
@@ -52,7 +70,7 @@ CONNECT BY LEVEL <= 20;
 -- This triggers the set_is_manager trigger, which updates the IsManager column in the Employees table
 -- StartDate takes the value of the employee's StartDate plus a random number of days between 1 and 365
 BEGIN
-    FOR i IN 0..5 LOOP
+    FOR i IN 1..6 LOOP
         INSERT INTO DepartmentManagers (EmployeeID, DepartmentNumber, StartDate)
         SELECT
             EmployeeID,
@@ -65,13 +83,14 @@ BEGIN
                 StartDate
             FROM Employees
             WHERE LeavingDate IS NOT NULL AND DepartmentNumber = i
-            SAMPLE (1)
+            ORDER BY DBMS_RANDOM.VALUE
         )
-        FETCH FIRST ROW ONLY;
+        WHERE ROWNUM = 1;
     END LOOP;
     COMMIT;
 END;
 /
+
 
 -- Inserting dependents for employees, with a 20% chance of being a partner
 -- The random_birth_date function is used to generate the birth date of the dependents, which might not be the most accurate way to simulate real data considering it might generate dates before the employee's birth date, for example, but it suffices for example purposes
@@ -91,7 +110,7 @@ FETCH FIRST 100 ROWS ONLY;
 -- Just an example of how to insert data into the EmployeeTransfers table
 -- This could use a loop to populate more rows or a SELECT statement to get data from other tables
 INSERT INTO EmployeeTransfers (EmployeeID, FromDepartmentNumber, ToDepartmentNumber, TransferDate)
-VALUES (DBMS_RANDOM.VALUE(100, 200), 1, 2, random_date());
+VALUES (FLOOR(DBMS_RANDOM.VALUE(100, 200)), 1, 2, random_date());
 
 -- Inserting data into the Projects table
 -- The CASE statement is used to simulate the possibility of a project having an end date or not
@@ -110,19 +129,13 @@ CONNECT BY LEVEL <= 100;
 
 -- This code should insert around 50 000 rows into the Assignments table, as it is a cross join between the Employees and Projects tables
 -- As there is a trigger to control if the assignment date is within the project's start and end date, the dates here were just copied from the Projects table
-INSERT INTO Assignments (EmployeeID, ProjectNumber, HoursPerWeek, AssignmentStart, AssignmentEnd)
+INSERT INTO Assignments (EmployeeID, ProjectNumber, HoursPerWeek, AssignmentStart)
 SELECT
-    e.EmployeeID,
-    p.ProjectNumber,
+    EmployeeID,
+    FLOOR(DBMS_RANDOM.VALUE(1, 100)),
     FLOOR(DBMS_RANDOM.VALUE(10, 40)),
-    p.StartDate AS AssignmentStart,
-    CASE 
-        WHEN DBMS_RANDOM.VALUE < 0.1 THEN random_date() + FLOOR(DBMS_RANDOM.VALUE(1, 365))
-        ELSE NULL
-    END AS AssignmentEnd
-FROM Employees e
-CROSS JOIN Projects p
-WHERE DBMS_RANDOM.VALUE < 0.5 AND p.EndDate IS NULL;
+    random_date()
+FROM Employees;
 
 -- This code populates the customers table with employees that work on sales, limiting the number of rows to 100 as an example
 INSERT INTO Customers (SalesRepresentative, CustomerName, CustomerEmail, CustomerPhone)
