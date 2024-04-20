@@ -1,4 +1,4 @@
-# Company Database Project README
+# The Company Database Project
 
 This repository contains the implementation of a company database project deployed on Apex Oracle. The purpose of this project is to practice SQL implementation from end to end, serving as a final assessment for the Databases course in the MS in Computer Science program at the University of Abertay.
 
@@ -70,7 +70,9 @@ The project encompasses the following components:
 
 ## Deployment
 
-The database project is deployed on Apex Oracle, and the web interface can be accessed via the following link: [Placeholder link to Apex Oracle web interface]
+The database project is deployed on Apex Oracle, and the web interface can be accessed via the following link: [Test_User](https://apex.oracle.com/pls/apex/r/ear/the-company-database)
+
+Alternativaly, you can deploy your own version by following the instructions below.
 
 ## Instructions
 
@@ -82,7 +84,7 @@ To utilize the database project, follow these steps:
 
 3. **Querying the Database**: Utilize the provided SQL queries and views to retrieve information from the database as needed.
 
-4. **Interacting with the Web Interface**: Access the web interface via the provided link to interact with the database through a user-friendly interface.
+4. **Interacting with the Web Interface**: Access the web interface via [Apex App Buider](https://apex.oracle.com/en/learn/getting-started/app-builder/) (you can run it from the DDL Script page under SQL Workshop to automatically include all tables).
 
 ## License
 
@@ -91,5 +93,4 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## Acknowledgments
 
 - This project was completed as part of the Databases course in the MS in Computer Science program at the University of Abertay.
-- Special thanks to Professor Stefan Binder for guidance and support throughout the project.
 
