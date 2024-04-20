@@ -4,6 +4,7 @@
 --   2024-04-18; last update on 2024-04-19
 -- ------------------------------------------------------------------------------
 
+
 -- Create a view that shows the details of each employee
 CREATE OR REPLACE VIEW EmployeeDetails_view AS
 SELECT E.EmployeeID, E.FirstName, E.LastName, E.JobTitle, E.Email, D.DepartmentName, M.FirstName AS ManagerFirstName, M.LastName AS ManagerLastName
