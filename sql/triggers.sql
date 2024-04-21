@@ -182,23 +182,6 @@ BEGIN
 END;
 /
 
--- Trigger to calculate the total price of an order based on the sum of the subtotals of the order details.
-CREATE OR REPLACE TRIGGER calculate_total_price
-AFTER INSERT OR UPDATE ON OrdersDetails
-FOR EACH ROW
-DECLARE
-   total_price NUMBER(12, 2);
-BEGIN
-   SELECT SUM(SubTotal) INTO total_price
-   FROM OrdersDetails
-   WHERE OrderNumber = :NEW.OrderNumber;
-
-   UPDATE SalesOrders
-   SET TotalPrice = total_price
-   WHERE OrderNumber = :NEW.OrderNumber;
-END;
-/
-
 -- Procedure to update the total price of a sales order when an order detail is filled.
 -- I created a procedure instead of a trigger to prevent the mutation of the table error.
 CREATE OR REPLACE PROCEDURE update_sales_orders AS 
