@@ -115,16 +115,12 @@ VALUES (FLOOR(DBMS_RANDOM.VALUE(100, 200)), 1, 2, random_date());
 
 -- Inserting data into the Projects table
 -- The CASE statement is used to simulate the possibility of a project having an end date or not
-INSERT INTO Projects (DepartmentNumber, LocationCode, ProjectName, StartDate, EndDate)
+INSERT INTO Projects (DepartmentNumber, LocationCode, ProjectName, StartDate)
 SELECT
     CEIL(DBMS_RANDOM.VALUE(1, 5)),
     CEIL(DBMS_RANDOM.VALUE(1, 20)),
     'Project' || rownum,
-    random_date(),
-    CASE 
-        WHEN DBMS_RANDOM.VALUE < 0.2 THEN random_date() + FLOOR(DBMS_RANDOM.VALUE(1, 365))
-        ELSE NULL
-    END
+    random_date()
 FROM dual
 CONNECT BY LEVEL <= 100;
 

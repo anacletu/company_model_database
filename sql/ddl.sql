@@ -73,8 +73,7 @@ CREATE TABLE Employees (
     PRIMARY KEY (EmployeeID),
     FOREIGN KEY (DepartmentNumber) REFERENCES Departments(DepartmentNumber),
     FOREIGN KEY (SupervisorID) REFERENCES Employees(EmployeeID),
-    CHECK (IsManager IN (0, 1)),
-    CHECK (LeavingDate IS NULL OR LeavingDate > StartDate)
+    CHECK (IsManager IN (0, 1))
 );
 
 -- The DepartmentManagers table stores information about the managers of departments.
