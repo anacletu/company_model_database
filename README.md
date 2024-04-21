@@ -2,7 +2,7 @@
 
 This repository contains the implementation of a company database project deployed on Apex Oracle. The purpose of this project is to practice SQL implementation from end to end, serving as a final assessment for the Databases course in the MS in Computer Science program at the University of Abertay.
 
-<img src="screenshots/App_sample.png" alt="Screenshot of the application on Apex" width="700"/>
+<img src="screenshots/App_sample.png" alt="Screenshot of the application on Apex" width="800"/>
 
 ## Table of Contents
 1. [Overview](#overview)
@@ -70,7 +70,7 @@ The project encompasses the following components:
 14. **ProductTransfer**:
     - Records transfers of products between warehouses.
 
-<img src="screenshots/Relational Model.png" alt="Screenshot of the relational schema" width="700"/>
+<img src="screenshots/Relational Model.png" alt="Screenshot of the relational schema" width="800"/>
 
 ## Deployment
 
