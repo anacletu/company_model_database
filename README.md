@@ -70,7 +70,7 @@ The project encompasses the following components:
 14. **ProductTransfer**:
     - Records transfers of products between warehouses.
 
-<img src="screenshots/Relational\ model.png" alt="Screenshot of the relational schema" width="700"/>
+<img src="screenshots/Relational_model.png" alt="Screenshot of the relational schema" width="700"/>
 
 ## Deployment
 
