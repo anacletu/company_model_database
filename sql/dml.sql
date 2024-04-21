@@ -22,6 +22,7 @@ DELETE FROM DepartmentManagers;
 DELETE FROM Employees;
 DELETE FROM Locations;
 DELETE FROM Departments;
+DELETE FROM EmployeeTransfers;
 
 
 -- ------------------------------------------------------------------------------

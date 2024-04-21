@@ -87,7 +87,7 @@ CREATE TABLE DepartmentManagers (
     EndDate DATE,
     PRIMARY KEY (ManagerID),
     FOREIGN KEY (EmployeeID) REFERENCES Employees(EmployeeID),
-    FOREIGN KEY (DepartmentNumber) REFERENCES Departments(DepartmentNumber)
+    FOREIGN KEY (DepartmentNumber) REFERENCES Departments(DepartmentNumber),
     CHECK (EndDate IS NULL OR EndDate > StartDate)
 );
 
@@ -127,7 +127,7 @@ CREATE TABLE Projects (
     EndDate DATE,
     PRIMARY KEY (ProjectNumber),
     FOREIGN KEY (DepartmentNumber) REFERENCES Departments(DepartmentNumber),
-    FOREIGN KEY (LocationCode) REFERENCES Locations(LocationCode)
+    FOREIGN KEY (LocationCode) REFERENCES Locations(LocationCode),
     CHECK (EndDate IS NULL OR EndDate > StartDate)
 );
 
