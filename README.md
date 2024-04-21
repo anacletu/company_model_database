@@ -70,6 +70,8 @@ The project encompasses the following components:
 14. **ProductTransfer**:
     - Records transfers of products between warehouses.
 
+<img src="screenshots/Relational\ Model.png" alt="Screenshot of the relational schema" width="700"/>
+
 ## Deployment
 
 The database project is deployed on Apex Oracle, and the web interface can be accessed via the following link: [Test_User](https://apex.oracle.com/pls/apex/r/ear/the-company-database)
