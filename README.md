@@ -2,6 +2,8 @@
 
 This repository contains the implementation of a company database project deployed on Apex Oracle. The purpose of this project is to practice SQL implementation from end to end, serving as a final assessment for the Databases course in the MS in Computer Science program at the University of Abertay.
 
+<img src="screenshots/App_sample.png" alt="Screenshot of the application on Apex" width="500"/>
+
 ## Table of Contents
 1. [Overview](#overview)
 2. [Database Tables Overview](#database-tables-overview)
