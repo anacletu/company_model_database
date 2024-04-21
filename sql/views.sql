@@ -20,8 +20,9 @@ JOIN Assignments A ON P.ProjectNumber = A.ProjectNumber
 JOIN Employees E ON A.EmployeeID = E.EmployeeID;
 
 -- Create a view that shows the details of each customer order
+-- Using TO_CHAR to format the date
 CREATE OR REPLACE VIEW CustomerOrders_view AS
-SELECT C.CustomerName, SO.OrderNumber, SO.OrderDate, OD.ProductID, OD.Quantity
+SELECT C.CustomerName, SO.OrderNumber, TO_CHAR(SO.OrderDate, 'DD/MM/YYYY') AS OrderDate, OD.ProductID, OD.Quantity
 FROM Customers C
 JOIN SalesOrders SO ON C.CustomerID = SO.CustomerID
 JOIN OrdersDetails OD ON SO.OrderNumber = OD.OrderNumber;
